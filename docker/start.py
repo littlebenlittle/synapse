@@ -125,6 +125,15 @@ def generate_config_from_template(config_dir, config_path, environ, ownership):
     subprocess.check_output(args)
 
 
+def check_environ(enviorn, *args):
+    fail = False
+    for v in args:
+        if v not in environ:
+            log("Environment variable '%s' is mandatory in `generate` mode." % (v,))
+            fail = True
+    if fail:
+        error("Exiting due to previous errors. See https://github.com/matrix-org/synapse/blob/master/INSTALL.md")
+    
 def run_generate_config(environ, ownership):
     """Run synapse with a --generate-config param to generate a template config file
 
@@ -134,9 +143,7 @@ def run_generate_config(environ, ownership):
 
     Never returns.
     """
-    for v in ("SYNAPSE_SERVER_NAME", "SYNAPSE_REPORT_STATS"):
-        if v not in environ:
-            error("Environment variable '%s' is mandatory in `generate` mode." % (v,))
+    check_environ(environ, "SYNAPSE_SERVER_NAME", "SYNAPSE_REPORT_STATS")
 
     server_name = environ["SYNAPSE_SERVER_NAME"]
     config_dir = environ.get("SYNAPSE_CONFIG_DIR", "/data")
